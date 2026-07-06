@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EA Tools Competitive Brief — UX Focus: Architecture Decisions</title>
+<style>
+  :root {
+    --sap-blue: #0070f2;
+    --ardoq-teal: #00b0a0;
+    --gap-red: #e53935;
+    --win-green: #2e7d32;
+    --warn-amber: #f57c00;
+    --bg: #f5f7fa;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --border: #e2e8f0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; }
+
+  /* Layout */
+  .workshop-header { background: linear-gradient(135deg, #0a1628 0%, #0070f2 100%); color: white; padding: 40px 48px 32px; }
+  .workshop-header h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+  .workshop-header .subtitle { opacity: .8; font-size: 14px; margin-bottom: 20px; }
+  .agenda-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 600; }
+  .chip.active { background: white; color: var(--sap-blue); }
+
+  main { max-width: 960px; margin: 0 auto; padding: 32px 24px 64px; }
+
+  /* Section headers */
+  .section { margin-bottom: 48px; }
+  .section-label { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .section-label .num { background: var(--sap-blue); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+  .section-label h2 { font-size: 20px; font-weight: 700; }
+  .section-label .priority-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; text-transform: uppercase; letter-spacing: .5px; }
+  .p1 { background: #fee2e2; color: #991b1b; }
+  .p2 { background: #fef3c7; color: #92400e; }
+  .p3 { background: #dbeafe; color: #1e40af; }
+  .p4 { background: #d1fae5; color: #065f46; }
+
+  /* Cards */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; }
+  .card-grid { display: grid; gap: 16px; }
+  .card-grid.cols2 { grid-template-columns: 1fr 1fr; }
+  .card-grid.cols3 { grid-template-columns: 1fr 1fr 1fr; }
+  @media(max-width:640px) { .card-grid.cols2, .card-grid.cols3 { grid-template-columns: 1fr; } }
+
+  /* Stat cards */
+  .stat-card { text-align: center; padding: 24px 16px; }
+  .stat-num { font-size: 36px; font-weight: 800; color: var(--sap-blue); }
+  .stat-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  /* Head-to-head */
+  .hth { display: grid; grid-template-columns: 1fr 80px 1fr; gap: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .hth-header { padding: 14px 16px; font-weight: 700; font-size: 14px; text-align: center; }
+  .hth-header.leanix { background: var(--sap-blue); color: white; }
+  .hth-header.vs { background: #1a1a2e; color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+  .hth-header.ardoq { background: var(--ardoq-teal); color: white; }
+  .hth-row { display: contents; }
+  .hth-cell { padding: 12px 16px; font-size: 13px; border-top: 1px solid var(--border); }
+  .hth-cell.label { background: #f8fafc; font-size: 12px; color: var(--muted); font-weight: 600; text-align: center; display: flex; align-items: center; justify-content: center; border-top: 1px solid var(--border); }
+  .hth-cell.win { background: #f0fdf4; }
+  .hth-cell.gap { background: #fff7ed; }
+
+  /* Maturity timeline */
+  .timeline { position: relative; padding: 20px 0 8px; }
+  .timeline-track { height: 4px; background: var(--border); border-radius: 4px; position: relative; margin: 0 24px; }
+  .timeline-ardoq { position: absolute; left: 0; width: 45%; height: 100%; background: var(--ardoq-teal); border-radius: 4px; }
+  .timeline-leanix { position: absolute; left: 73%; width: 27%; height: 100%; background: var(--sap-blue); border-radius: 4px; }
+  .timeline-labels { display: flex; justify-content: space-between; margin: 8px 24px 0; font-size: 12px; color: var(--muted); }
+  .timeline-dots { display: flex; justify-content: space-between; margin: -6px 24px 0; position: relative; }
+  .timeline-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 2px var(--border); }
+  .timeline-legend { display: flex; gap: 20px; margin-top: 16px; justify-content: center; }
+  .tl-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+  .tl-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* Pull quotes */
+  .quote-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media(max-width:640px) { .quote-grid { grid-template-columns: 1fr; } }
+  .quote-card { border-radius: 10px; padding: 16px 18px; border-left: 4px solid; }
+  .quote-card.praise { background: #f0fdf4; border-color: var(--win-green); }
+  .quote-card.pain { background: #fff7ed; border-color: var(--warn-amber); }
+  .quote-card.ardoq-q { background: #f0fffe; border-color: var(--ardoq-teal); }
+  .quote-text { font-size: 13.5px; font-style: italic; line-height: 1.5; margin-bottom: 8px; }
+  .quote-src { font-size: 11px; color: var(--muted); font-weight: 600; }
+
+  /* Rating bars */
+  .rating-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .rating-label { width: 180px; font-size: 13px; flex-shrink: 0; }
+  .bar-wrap { flex: 1; background: var(--border); border-radius: 4px; height: 10px; overflow: hidden; }
+  .bar { height: 100%; border-radius: 4px; }
+  .bar.lx { background: var(--sap-blue); }
+  .bar.aq { background: var(--ardoq-teal); }
+  .rating-val { width: 36px; font-size: 12px; font-weight: 700; text-align: right; }
+  .rating-legend { display: flex; gap: 16px; margin-bottom: 14px; font-size: 12px; }
+  .rl-dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 4px; }
+
+  /* Feature matrix */
+  .matrix { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .matrix th { background: #1a1a2e; color: white; padding: 10px 14px; text-align: left; font-size: 12px; font-weight: 600; }
+  .matrix th:first-child { border-radius: 8px 0 0 0; }
+  .matrix th:last-child { border-radius: 0 8px 0 0; }
+  .matrix td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .matrix tr:nth-child(even) td { background: #f8fafc; }
+  .matrix tr:last-child td { border-bottom: none; }
+  .yes { color: var(--win-green); font-weight: 700; }
+  .partial { color: var(--warn-amber); font-weight: 600; }
+  .no { color: var(--gap-red); }
+
+  /* Callout boxes */
+  .callout { border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; display: flex; gap: 12px; }
+  .callout.danger { background: #fef2f2; border: 1px solid #fecaca; }
+  .callout.info { background: #eff6ff; border: 1px solid #bfdbfe; }
+  .callout.success { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .callout .icon { font-size: 20px; flex-shrink: 0; }
+  .callout-body { font-size: 13.5px; }
+  .callout-body strong { display: block; margin-bottom: 4px; font-size: 14px; }
+
+  /* Action list */
+  .action-list { list-style: none; }
+  .action-list li { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+  .action-list li:last-child { border-bottom: none; }
+  .action-num { background: var(--sap-blue); color: white; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; flex-shrink: 0; margin-top: 1px; }
+  .action-content strong { display: block; font-size: 14px; margin-bottom: 3px; }
+  .action-content span { font-size: 13px; color: var(--muted); }
+
+  /* Sources */
+  .sources { font-size: 12px; color: var(--muted); line-height: 1.8; }
+  .sources a { color: var(--sap-blue); text-decoration: none; }
+  .sources a:hover { text-decoration: underline; }
+
+  /* Dividers */
+  hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+  .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; margin-right: 4px; }
+  .tag.new { background: #dbeafe; color: #1e40af; }
+  .tag.gap { background: #fee2e2; color: #991b1b; }
+  .tag.win { background: #d1fae5; color: #065f46; }
+  .note { font-size: 12px; color: var(--muted); font-style: italic; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<div class="workshop-header">
+  <h1>EA Tools Competitive Brief — UX Focus: Architecture Decisions</h1>
+  <p class="subtitle">SAP LeanIX vs. Ardoq &amp; the Challenger Set · Research date: July 6, 2026 · 10-minute read</p>
+  <div class="agenda-chips">
+    <span class="chip active">1 · ADR Feature Gap</span>
+    <span class="chip">2 · Voice of Customer</span>
+    <span class="chip">3 · Target Architecture UX</span>
+    <span class="chip">4 · AI Governance UX</span>
+    <span class="chip">5 · UX Actions</span>
+  </div>
+</div>
+
+<main>
+
+  <!-- Market snapshot -->
+  <div class="section">
+    <div class="section-label">
+      <div class="num">0</div>
+      <h2>Market Snapshot</h2>
+    </div>
+    <div class="card-grid cols3">
+      <div class="card stat-card">
+        <div class="stat-num">~$1.2B</div>
+        <div class="stat-label">EA tools market 2024<br><small>(Grand View / Polaris consensus)</small></div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-num">5</div>
+        <div class="stat-label">Leaders in Gartner MQ 2025<br><small>LeanIX · Ardoq · Bizzdesign · Avolution · BOC</small></div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-num">4 yrs</div>
+        <div class="stat-label">Ardoq's ADR head-start over LeanIX<br><small>Ardoq ~2021 · LeanIX 2025 launch</small></div>
+      </div>
+    </div>
+    <p class="note" style="margin-top:12px; padding: 0 4px;">Neither LeanIX nor Ardoq is a Forrester Wave Leader (Q4 2024). Leaders there: Orbus, MEGA/Bizzdesign, Software AG — a meaningful counterpoint for enterprise procurement conversations.</p>
+  </div>
+
+  <!-- Section 1: ADR Feature Gap -->
+  <div class="section">
+    <div class="section-label">
+      <div class="num">1</div>
+      <h2>ADR Feature Gap: LeanIX vs. Ardoq</h2>
+      <span class="priority-badge p1">Priority 1 for UX Design</span>
+    </div>
+
+    <div class="callout danger">
+      <span class="icon">⚠️</span>
+      <div class="callout-body">
+        <strong>The core UX problem</strong>
+        LeanIX launched Architecture Decisions in 2025 — Ardoq has shipped theirs since ~2021. The gap isn't just time: Ardoq's ADR is woven into Jira, scenario workspaces, and a stakeholder-facing Discover portal. LeanIX's is new, standalone, and still maturing AI guidance.
+      </div>
+    </div>
+
+    <!-- ADR maturity timeline -->
+    <div class="card" style="margin-bottom:16px;">
+      <p style="font-size:13px; font-weight:700; margin-bottom:14px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px;">ADR Maturity Timeline</p>
+      <div class="timeline">
+        <div class="timeline-track">
+          <div class="timeline-ardoq"></div>
+          <div class="timeline-leanix"></div>
+        </div>
+        <div class="timeline-labels">
+          <span>2021</span>
+          <span>2022</span>
+          <span>2023</span>
+          <span>2024</span>
+          <span>2025</span>
+          <span>2026</span>
+        </div>
+      </div>
+      <div class="timeline-legend">
+        <div class="tl-item"><div class="tl-dot" style="background:var(--ardoq-teal)"></div> Ardoq — ADR GA, Jira integration, Discover viewpoint</div>
+        <div class="tl-item"><div class="tl-dot" style="background:var(--sap-blue)"></div> LeanIX — Architecture Decisions launch + AI guidance roadmap</div>
+      </div>
+    </div>
+
+    <!-- Side-by-side -->
+    <div class="hth">
+      <div class="hth-header leanix">SAP LeanIX</div>
+      <div class="hth-header vs">vs</div>
+      <div class="hth-header ardoq">Ardoq</div>
+
+      <div class="hth-cell win">Decisions linked to Fact Sheets (Apps, IT Components, Projects)</div>
+      <div class="hth-cell label">Fact Sheet / Graph link</div>
+      <div class="hth-cell win">Decisions are first-class graph nodes — fully queryable &amp; visualizable</div>
+
+      <div class="hth-cell gap">2025 launch — &lt;1 year production maturity <span class="tag gap">Gap</span></div>
+      <div class="hth-cell label">Maturity</div>
+      <div class="hth-cell win">~4 years in production <span class="tag win">Lead</span></div>
+
+      <div class="hth-cell gap">AI guidance on roadmap (planned/in beta)</div>
+      <div class="hth-cell label">AI assistance</div>
+      <div class="hth-cell win">AI-assisted drafting via Omnipresent AI Assistant (GA)</div>
+
+      <div class="hth-cell gap">Confluence / SharePoint link (no round-trip sync)</div>
+      <div class="hth-cell label">External tool sync</div>
+      <div class="hth-cell win">Jira deep integration — ADR-to-initiative-to-delivery status traceability</div>
+
+      <div class="hth-cell gap">No Git-native sync <span class="tag gap">Gap</span></div>
+      <div class="hth-cell label">Git/code-native</div>
+      <div class="hth-cell gap">No Git round-trip either <span class="tag gap">Shared gap</span></div>
+
+      <div class="hth-cell win">Embedded in SAP transformation stack (Signavio + WalkMe) <span class="tag win">Unique</span></div>
+      <div class="hth-cell label">Ecosystem advantage</div>
+      <div class="hth-cell">Standalone; strong ServiceNow sync</div>
+
+      <div class="hth-cell win">Diagram embedding (late 2025) for scenario comparison</div>
+      <div class="hth-cell label">Visual decision context</div>
+      <div class="hth-cell win">Scenario workspace diff — "side-by-side option comparison" (Git-style branch)</div>
+
+      <div class="hth-cell gap">No dedicated consumer view for non-EA stakeholders yet</div>
+      <div class="hth-cell label">Stakeholder access</div>
+      <div class="hth-cell win">"Decision Records" Viewpoint in Discover portal — stakeholder self-serve</div>
+    </div>
+
+    <div class="callout info" style="margin-top:16px;">
+      <span class="icon">💡</span>
+      <div class="callout-body">
+        <strong>The shared gap — biggest UX opportunity for 2026</strong>
+        Neither vendor ships Git-native ADR round-trip sync. Structurizr already wins developer accounts with its DSL <code>!adrs</code> importer. A LeanIX Git sync would leapfrog Ardoq's URL-based Confluence link and win developer-heavy accounts that currently see EA tools as bureaucracy.
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- Section 2: Voice of Customer -->
+  <div class="section">
+    <div class="section-label">
+      <div class="num">2</div>
+      <h2>Voice of Customer — Verbatim</h2>
+      <span class="priority-badge p2">Priority 2 — UX Debt &amp; Bar-Setters</span>
+    </div>
+
+    <!-- Ratings bars -->
+    <div class="card" style="margin-bottom:20px;">
+      <p style="font-size:13px; font-weight:700; margin-bottom:14px;">Public Ratings Comparison</p>
+      <div class="rating-legend">
+        <span><span class="rl-dot" style="background:var(--sap-blue)"></span>SAP LeanIX</span>
+        <span><span class="rl-dot" style="background:var(--ardoq-teal)"></span>Ardoq</span>
+      </div>
+      <div class="rating-row">
+        <span class="rating-label">G2 Overall</span>
+        <div class="bar-wrap"><div class="bar lx" style="width:90%"></div></div>
+        <span class="rating-val">4.5</span>
+      </div>
+      <div class="rating-row">
+        <span class="rating-label"></span>
+        <div class="bar-wrap"><div class="bar aq" style="width:90%"></div></div>
+        <span class="rating-val">4.5</span>
+      </div>
+      <div class="rating-row">
+        <span class="rating-label">Gartner Peer Insights</span>
+        <div class="bar-wrap"><div class="bar lx" style="width:94%"></div></div>
+        <span class="rating-val">4.7</span>
+      </div>
+      <div class="rating-row">
+        <span class="rating-label"></span>
+        <div class="bar-wrap"><div class="bar aq" style="width:96%"></div></div>
+        <span class="rating-val">4.8</span>
+      </div>
+      <div class="rating-row">
+        <span class="rating-label">Support Experience</span>
+        <div class="bar-wrap"><div class="bar lx" style="width:75%"></div></div>
+        <span class="rating-val">—</span>
+      </div>
+      <div class="rating-row">
+        <span class="rating-label"></span>
+        <div class="bar-wrap"><div class="bar aq" style="width:98%"></div></div>
+        <span class="rating-val">4.9 ★</span>
+      </div>
+      <div class="rating-row">
+        <span class="rating-label">Ease of Use (G2)</span>
+        <div class="bar-wrap"><div class="bar lx" style="width:80%"></div></div>
+        <span class="rating-val">8.0</span>
+      </div>
+      <div class="rating-row">
+        <span class="rating-label"></span>
+        <div class="bar-wrap"><div class="bar aq" style="width:78%"></div></div>
+        <span class="rating-val">7.8</span>
+      </div>
+      <p class="note">G2 direct side-by-side: "SAP LeanIX is easier to use, easier to set up, and easier to administer" than Ardoq.</p>
+    </div>
+
+    <p style="font-size:13px; font-weight:700; margin-bottom:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px;">LeanIX — What Users Say</p>
+    <div class="quote-grid" style="margin-bottom:20px;">
+      <div class="quote-card praise">
+        <p class="quote-text">"Very simple user interface, great visualisations and pre-built report templates... Licence model that allows for unlimited users. This really helps drive adoption in the organisation."</p>
+        <p class="quote-src">G2 · Verbatim</p>
+      </div>
+      <div class="quote-card praise">
+        <p class="quote-text">"The EA tool with the greatest internal adoption I have seen."</p>
+        <p class="quote-src">Reddit r/enterprisearchitecture</p>
+      </div>
+      <div class="quote-card pain">
+        <p class="quote-text">"LeanIX is not a proper modeling tool, its metamodel is super fixed and limited."</p>
+        <p class="quote-src">Reddit (Sparx-to-LeanIX migrator)</p>
+      </div>
+      <div class="quote-card pain">
+        <p class="quote-text">"Some reports are still not visually appealing enough to present to C-level stakeholders."</p>
+        <p class="quote-src">G2 · Verbatim</p>
+      </div>
+      <div class="quote-card pain">
+        <p class="quote-text">"Diagram editor is very basic but improving rapidly. E.g. Copy and Paste has only just been introduced into beta."</p>
+        <p class="quote-src">G2 · Verbatim</p>
+      </div>
+      <div class="quote-card pain">
+        <p class="quote-text">"More geared towards a one-time transformation project… ongoing annual cycles can be more of a challenge."</p>
+        <p class="quote-src">G2 · Verbatim</p>
+      </div>
+    </div>
+
+    <p style="font-size:13px; font-weight:700; margin-bottom:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px;">Ardoq — What Users Say</p>
+    <div class="quote-grid">
+      <div class="quote-card ardoq-q">
+        <p class="quote-text">"Ardoq itself is extremely flexible compared to most other EA tools (being really a graph database with a fancy front-end!), meaning we can quickly create relationships between completely disparate reference datasets."</p>
+        <p class="quote-src">Customer testimonial</p>
+      </div>
+      <div class="quote-card ardoq-q">
+        <p class="quote-text">"Best service I have had in 37 years of working in IT."</p>
+        <p class="quote-src">Gartner Peer Insights (Support, 4.9/5)</p>
+      </div>
+      <div class="quote-card pain">
+        <p class="quote-text">"Approximately 30–50% of new users struggle with the learning curve associated with Ardoq, which can lead to lower engagement and slower overall adoption rates."</p>
+        <p class="quote-src">CanvasBusinessModel comparison</p>
+      </div>
+      <div class="quote-card pain">
+        <p class="quote-text">"Ardoq has quite a busy user interface, as a new user it can take a while to get familiar and comfortable with the navigation."</p>
+        <p class="quote-src">G2 · Verbatim</p>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- Section 3: Target Architecture UX -->
+  <div class="section">
+    <div class="section-label">
+      <div class="num">3</div>
+      <h2>Target Architecture Planning — UX Comparison</h2>
+      <span class="priority-badge p3">Priority 3 — Decision ↔ Roadmap Link</span>
+    </div>
+
+    <div class="callout info">
+      <span class="icon">🔗</span>
+      <div class="callout-body">
+        <strong>Why this matters for Architecture Decisions UX</strong>
+        A decision without a roadmap context is orphaned documentation. The UX question is: how does an accepted Architecture Decision become a visible milestone or constraint on the target state? LeanIX and Ardoq answer this very differently.
+      </div>
+    </div>
+
+    <table class="matrix" style="margin-top:16px;">
+      <thead>
+        <tr>
+          <th>Dimension</th>
+          <th>SAP LeanIX</th>
+          <th>Ardoq</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Scenario branching</strong></td>
+          <td class="partial">BTM add-on (separate module) ⚠️</td>
+          <td class="yes">Native "Git-style" branch — no extra cost ✅</td>
+        </tr>
+        <tr>
+          <td><strong>Decision → roadmap link</strong></td>
+          <td class="partial">Via Initiative Fact Sheet (manual link)</td>
+          <td class="yes">ADR linked to initiative → linked to Jira → delivery status visible</td>
+        </tr>
+        <tr>
+          <td><strong>Diff / comparison view</strong></td>
+          <td class="partial">Diagram embedding (late 2025, maturing)</td>
+          <td class="yes">Side-by-side scenario diff, visual change overlay</td>
+        </tr>
+        <tr>
+          <td><strong>Crowdsourcing input</strong></td>
+          <td>Surveys → Fact Sheets (structured)</td>
+          <td class="yes">Broadcasts + Discover portal + Survey Approvals</td>
+        </tr>
+        <tr>
+          <td><strong>Framework alignment</strong></td>
+          <td class="yes">TIME + 6R first-class fields ✅ (Gartner-standard)</td>
+          <td class="partial">Configurable — not pre-built</td>
+        </tr>
+        <tr>
+          <td><strong>Free-form modeling</strong></td>
+          <td class="partial">Free Draw — non-FS shapes are visual-only ⚠️</td>
+          <td class="yes">All drawn relations are queryable graph data</td>
+        </tr>
+        <tr>
+          <td><strong>Stakeholder roadmap sharing</strong></td>
+          <td class="yes">Unlimited viewer users, dashboards ✅</td>
+          <td>Presentations + Discover consumer app</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout danger" style="margin-top:16px;">
+      <span class="icon">🚨</span>
+      <div class="callout-body">
+        <strong>Critical UX Debt: Free Draw shapes are "visual-only"</strong>
+        Shapes in LeanIX Free Draw that aren't Fact Sheet containers don't appear in reports or other views. This breaks the designer expectation that "what I draw = what the system knows." Users who sketch a target-state diagram expect it to be queryable data.
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- Section 4: AI Governance UX -->
+  <div class="section">
+    <div class="section-label">
+      <div class="num">4</div>
+      <h2>AI Governance UX — First-Mover, But UX Must Catch Up</h2>
+      <span class="priority-badge p4">Priority 4 — Opportunity, Not Catch-Up</span>
+    </div>
+
+    <div class="callout success">
+      <span class="icon">🚀</span>
+      <div class="callout-body">
+        <strong>LeanIX is ahead here — protect it</strong>
+        AI Agent Hub + MCP Server both GA in 2025, included in subscription for all customers. Ardoq's AI Gateway is competitive but newer. The UX challenge is making the AI Agent Radar and EU AI Act risk tiers legible to non-EA users — not just architects.
+      </div>
+    </div>
+
+    <table class="matrix" style="margin-top:16px;">
+      <thead>
+        <tr>
+          <th>AI Feature</th>
+          <th>LeanIX</th>
+          <th>Ardoq</th>
+          <th>Bizzdesign</th>
+          <th>ServiceNow</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Native ADR module</strong></td>
+          <td class="yes">Yes (2025) <span class="tag new">New</span></td>
+          <td class="yes">Yes (~2021)</td>
+          <td class="no">No</td>
+          <td class="no">Custom object only</td>
+        </tr>
+        <tr>
+          <td><strong>MCP Server / AI Gateway</strong></td>
+          <td class="yes">GA 2025 ✅</td>
+          <td class="yes">AI Gateway (2025)</td>
+          <td class="yes">MCP (Copilot/Claude)</td>
+          <td class="yes">AI Control Tower</td>
+        </tr>
+        <tr>
+          <td><strong>AI Agent Governance</strong></td>
+          <td class="yes">AI Agent Hub (GA, included) ✅</td>
+          <td class="partial">Foundation Insights ⚠️</td>
+          <td class="partial">Portfolio governance ⚠️</td>
+          <td class="yes">AICT ✅</td>
+        </tr>
+        <tr>
+          <td><strong>EU AI Act risk tiers</strong></td>
+          <td class="yes">Yes — metamodel extension ✅</td>
+          <td class="partial">Partial</td>
+          <td class="yes">Yes</td>
+          <td class="partial">Partial</td>
+        </tr>
+        <tr>
+          <td><strong>NL chat over EA data</strong></td>
+          <td class="partial">EA Assistant (beta → GA 2026)</td>
+          <td class="yes">Omnipresent AI Assistant (GA)</td>
+          <td class="partial">How-to Coach (docs only)</td>
+          <td class="partial">Now Assist (ITSM-focused)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="quote-card praise" style="margin-top:16px;">
+      <p class="quote-text">"You can now use natural language to chat with compliant AI agents to retrieve Fact Sheet data, find reports, manage surveys, and even create architecture decisions."</p>
+      <p class="quote-src">LinkedIn recap, LeanIX MCP Server GA announcement · 2025</p>
+    </div>
+
+    <div class="callout info" style="margin-top:14px;">
+      <span class="icon">🎯</span>
+      <div class="callout-body">
+        <strong>UX design priority for AI Governance</strong>
+        The AI Agent Radar (approval status: exploratory → preview → fully accepted) is a powerful governance artifact but it's architect-facing today. The UX opportunity: a CIO/CISO-readable dashboard view — one-click EU AI Act compliance posture without needing to understand the metamodel.
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- Section 5: UX Action Items -->
+  <div class="section">
+    <div class="section-label">
+      <div class="num">5</div>
+      <h2>UX Action Items — Prioritized</h2>
+    </div>
+
+    <ul class="action-list">
+      <li>
+        <div class="action-num">1</div>
+        <div class="action-content">
+          <strong>Ship a stakeholder-facing ADR consumer view</strong>
+          <span>Ardoq's "Decision Records" Viewpoint in Discover is the benchmark. LeanIX needs a zero-training read-only view where non-EA stakeholders can see which decisions affect their applications — without needing to understand Fact Sheets.</span>
+        </div>
+      </li>
+      <li>
+        <div class="action-num">2</div>
+        <div class="action-content">
+          <strong>Surface Jira traceability on ADR detail pages</strong>
+          <span>Ardoq wins on ADR→initiative→Jira→delivery-status traceability. LeanIX should expose this chain visually on the decision detail page: Decision status → linked Initiative → Jira epic status — without leaving LeanIX.</span>
+        </div>
+      </li>
+      <li>
+        <div class="action-num">3</div>
+        <div class="action-content">
+          <strong>Fix Free Draw "visual-only" expectation gap</strong>
+          <span>The current behavior — drawn shapes that aren't Fact Sheets don't appear in reports — breaks the mental model for anyone familiar with Lucidchart or Miro. Either surface a clear in-canvas warning ("this shape won't appear in reports") or make all drawn elements promotable to Fact Sheets in one click.</span>
+        </div>
+      </li>
+      <li>
+        <div class="action-num">4</div>
+        <div class="action-content">
+          <strong>Make the AI Agent Radar legible to CISOs</strong>
+          <span>The EU AI Act risk-tier fields exist in the metamodel extension — the UX gap is a summary view. Design a one-page "AI Compliance Posture" report: N agents by risk tier, N awaiting approval, N violating policy. This is the executive artifact that no competitor ships yet.</span>
+        </div>
+      </li>
+      <li>
+        <div class="action-num">5</div>
+        <div class="action-content">
+          <strong>Spike: Git-native ADR round-trip</strong>
+          <span>Neither LeanIX nor Ardoq syncs with Markdown-in-Git. A proof-of-concept that imports MADR files from a repo into Architecture Decisions (and writes back status changes) would leapfrog the category and win developer-heavy accounts. Structurizr already does this — LeanIX should too.</span>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <hr>
+
+  <!-- Sources -->
+  <div class="section">
+    <div class="section-label">
+      <div class="num" style="background:var(--muted)">↗</div>
+      <h2 style="font-size:16px; color:var(--muted);">Sources &amp; Further Reading</h2>
+    </div>
+    <div class="sources">
+      <a href="https://www.gartner.com/reviews/market/enterprise-architecture-tools" target="_blank">Gartner Peer Insights — EA Tools</a> ·
+      <a href="https://www.g2.com/products/leanix/reviews" target="_blank">G2 LeanIX reviews</a> ·
+      <a href="https://www.g2.com/products/ardoq/reviews" target="_blank">G2 Ardoq reviews</a> ·
+      <a href="https://help.ardoq.com/en/articles/architecture-records" target="_blank">Ardoq Architecture Records (help.ardoq.com)</a> ·
+      <a href="https://docs.leanix.net" target="_blank">LeanIX docs (Architecture Decisions)</a> ·
+      <a href="https://www.thoughtworks.com/radar" target="_blank">ThoughtWorks Technology Radar — Lightweight ADRs</a> ·
+      <a href="https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions" target="_blank">Nygard 2011 — Documenting Architecture Decisions</a> ·
+      <a href="https://adr.github.io/madr/" target="_blank">MADR (Markdown Any Decision Records)</a> ·
+      <a href="https://github.com/structurizr/dsl" target="_blank">Structurizr DSL (!adrs)</a> ·
+      <a href="https://github.com/thomvaill/log4brains" target="_blank">Log4brains (OSS ADR tool)</a> ·
+      <a href="https://techcrunch.com" target="_blank">TechCrunch — SAP acquires LeanIX (Sept 2023)</a> ·
+      <a href="https://www.forrester.com/report/the-forrester-wave-enterprise-architecture-management-suites-q4-2024" target="_blank">Forrester Wave EAMS Q4 2024</a> ·
+      <a href="https://www.reddit.com/r/enterprisearchitecture" target="_blank">Reddit r/enterprisearchitecture</a>
+    </div>
+  </div>
+
+</main>
+</body>
+</html>
