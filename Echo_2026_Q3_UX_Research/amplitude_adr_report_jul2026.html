@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Architecture Decision – Behavior Data Analysis (Jul 2026)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; color: #172b4d; background: #f4f5f7; line-height: 1.6; }
+    .page { max-width: 960px; margin: 32px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.1); padding: 40px 48px; }
+    h1 { font-size: 24px; font-weight: 700; color: #172b4d; margin-bottom: 4px; }
+    .meta { font-size: 12px; color: #6b778c; margin-bottom: 32px; }
+    .meta a { color: #0052cc; text-decoration: none; }
+    h2 { font-size: 18px; font-weight: 600; color: #172b4d; margin: 32px 0 12px; border-bottom: 2px solid #e3f2fd; padding-bottom: 6px; }
+    h3 { font-size: 15px; font-weight: 600; color: #172b4d; margin: 20px 0 8px; }
+    h4 { font-size: 13px; font-weight: 600; color: #42526e; margin: 16px 0 6px; }
+    p { margin-bottom: 10px; }
+    ul, ol { margin: 0 0 12px 20px; }
+    li { margin-bottom: 4px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 13px; }
+    th { background: #f4f5f7; color: #42526e; font-weight: 600; text-align: left; padding: 8px 10px; border: 1px solid #dfe1e6; }
+    td { padding: 7px 10px; border: 1px solid #dfe1e6; vertical-align: top; }
+    tr:nth-child(even) td { background: #fafbfc; }
+    .highlight { background: #fffae6 !important; font-weight: 600; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 700; }
+    .badge-green { background: #e3fcef; color: #006644; }
+    .badge-yellow { background: #fffae6; color: #974f0c; }
+    .badge-red { background: #ffebe6; color: #bf2600; }
+    .badge-blue { background: #deebff; color: #0747a6; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+    .kpi-card { background: #f4f5f7; border-radius: 6px; padding: 16px; border-left: 4px solid #0052cc; }
+    .kpi-card.warn { border-left-color: #ff8b00; }
+    .kpi-card.good { border-left-color: #00875a; }
+    .kpi-label { font-size: 11px; color: #6b778c; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+    .kpi-value { font-size: 28px; font-weight: 700; color: #172b4d; line-height: 1; }
+    .kpi-sub { font-size: 12px; color: #6b778c; margin-top: 4px; }
+    .kpi-delta-pos { color: #00875a; font-weight: 600; }
+    .kpi-delta-neg { color: #ff8b00; font-weight: 600; }
+    hr { border: none; border-top: 1px solid #e3f2fd; margin: 28px 0; }
+    code { background: #f4f5f7; padding: 1px 4px; border-radius: 3px; font-family: "SFMono-Regular", Consolas, monospace; font-size: 12px; }
+    .section-desc { color: #42526e; font-size: 13px; margin-bottom: 16px; }
+    .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #dfe1e6; font-size: 12px; color: #6b778c; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <h1>Architecture Decision — Behavior Data Analysis</h1>
+  <div class="meta">
+    Updated <strong>July 6, 2026</strong> &nbsp;·&nbsp; Driver: Jieun Ryu &nbsp;·&nbsp; Status: <span class="badge badge-green">Done</span>
+    &nbsp;·&nbsp;
+    Source:
+    <a href="https://app.amplitude.com/analytics/leanix/dashboard/htqz5k4j">Amplitude dashboard</a> &nbsp;|&nbsp;
+    <a href="https://app.amplitude.com/analytics/share/33fd299b55fd4c36adfa2cbbb963e090">Funnel data</a> &nbsp;|&nbsp;
+    <a href="https://leanix.atlassian.net/wiki/x/V4CrZQI">Original Confluence report</a>
+    &nbsp;·&nbsp; Data scope: LIVE workspaces, internal accounts excluded · Last 4 weeks (rolling)
+  </div>
+
+  <!-- KPI Grid -->
+  <h2>Key Metrics Snapshot — Last 4 Weeks (as of Jul 6, 2026)</h2>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Decision List WAU</div>
+      <div class="kpi-value">969</div>
+      <div class="kpi-sub">unique users &nbsp;<span class="kpi-delta-neg">−0.8% WoW</span></div>
+    </div>
+    <div class="kpi-card warn">
+      <div class="kpi-label">Template List WAU</div>
+      <div class="kpi-value">85</div>
+      <div class="kpi-sub">unique users &nbsp;<span class="kpi-delta-neg">−24.8% WoW ⚠</span></div>
+    </div>
+    <div class="kpi-card good">
+      <div class="kpi-label">Decision Create → Save</div>
+      <div class="kpi-value">46.1%</div>
+      <div class="kpi-sub">1,031 → 475 &nbsp;<span class="kpi-delta-pos">≈ stable</span></div>
+    </div>
+    <div class="kpi-card good">
+      <div class="kpi-label">Decision Edit → Save</div>
+      <div class="kpi-value">83.1%</div>
+      <div class="kpi-sub">598 → 497 &nbsp;<span class="kpi-delta-pos">strong completion</span></div>
+    </div>
+    <div class="kpi-card good">
+      <div class="kpi-label">Template Create → Save</div>
+      <div class="kpi-value">53.3%</div>
+      <div class="kpi-sub">152 → 81 &nbsp;<span class="kpi-delta-pos">↑ from ~47%</span></div>
+    </div>
+    <div class="kpi-card good">
+      <div class="kpi-label">Template Open → Save</div>
+      <div class="kpi-value">53.3%</div>
+      <div class="kpi-sub">214 → 114 &nbsp;<span class="kpi-delta-pos">↑ from 33.6%</span></div>
+    </div>
+  </div>
+
+  <table>
+    <tbody>
+      <tr>
+        <th>Metric</th>
+        <th>Current (Jul 2026)</th>
+        <th>Prior (May 2026)</th>
+        <th>Change</th>
+      </tr>
+      <tr>
+        <td>Decision List WAU</td>
+        <td><strong>969</strong></td>
+        <td>—</td>
+        <td>−0.8% WoW</td>
+      </tr>
+      <tr class="highlight">
+        <td>Template List WAU</td>
+        <td><strong>85</strong></td>
+        <td>—</td>
+        <td><span class="badge badge-yellow">−24.8% WoW ⚠</span></td>
+      </tr>
+      <tr>
+        <td>Decision Create → Save</td>
+        <td><strong>46.1%</strong> (1,031 → 475)</td>
+        <td>~45–50%</td>
+        <td><span class="badge badge-green">Stable</span></td>
+      </tr>
+      <tr>
+        <td>Decision Edit → Save</td>
+        <td><strong>83.1%</strong> (598 → 497)</td>
+        <td>—</td>
+        <td><span class="badge badge-green">High</span></td>
+      </tr>
+      <tr>
+        <td>Template Create → Save</td>
+        <td><strong>53.3%</strong> (152 → 81)</td>
+        <td>~47%</td>
+        <td><span class="badge badge-green">↑ Improved</span></td>
+      </tr>
+      <tr>
+        <td>Template Open → Save</td>
+        <td><strong>53.3%</strong> (214 → 114)</td>
+        <td>33.6%</td>
+        <td><span class="badge badge-green">↑ Significant</span></td>
+      </tr>
+      <tr>
+        <td>FS-Origin: FS click → Edit → Save</td>
+        <td>100% → <strong>24.8%</strong> → <strong>19.7%</strong> (218 → 54 → 43)</td>
+        <td>20.6% / 10.6%</td>
+        <td><span class="badge badge-green">↑ Improved</span></td>
+      </tr>
+      <tr>
+        <td>Architecture Guidance ADR steps/day (avg)</td>
+        <td><strong>6</strong></td>
+        <td>—</td>
+        <td>SURVEY: 9, TRANSFORMATION: 4</td>
+      </tr>
+      <tr>
+        <td>TAP Diagram → ADR (Sync / Generate)</td>
+        <td><strong>75 / 51</strong> unique users</td>
+        <td>—</td>
+        <td>From TAP Diagram Save Dialog</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr />
+
+  <!-- Section 1 -->
+  <h2>1. How Do Users Navigate to Architecture Decisions?</h2>
+  <p class="section-desc">Based on Amplitude data from the first week of May and ongoing dashboard tracking.</p>
+
+  <h3>Key Findings</h3>
+  <ul>
+    <li><strong>Direct access dominates (~94%).</strong> Most users navigate to the Decision list directly via session start — bookmarks or direct URL. No organic discovery funnel drives the majority of traffic.</li>
+    <li><strong>Factsheet resource tab is the #1 organic entry point (~1.2%).</strong> Of the remaining ~5.8% organic traffic, Factsheet and Diagram-based navigation are nearly equal, making Diagrams a co-equal organic channel.</li>
+    <li><strong>Diagram-based entry is growing rapidly.</strong> Over 12 weeks: Diagram 819 events vs. Factsheet 869. In last 4 weeks: Diagrams (321) nearly match total FS ingress (350) — a fast-emerging primary organic channel.</li>
+    <li><strong>Status updates represent a distinct editing pattern.</strong> Of 279 users who clicked the edit button, ~32% (~88 users) performed a status update as their first action. These should be tracked separately from "authoring" activity.</li>
+    <li><strong>~94% of saves happen within the first hour</strong> of opening the edit flow — editing is near-synchronous with opening.</li>
+  </ul>
+
+  <h4>Action Before Save (287 users who hit <code>documents-decision-edit-button-click</code>)</h4>
+  <table>
+    <tbody>
+      <tr><th>Action</th><th>Event</th><th>Users</th><th>Share</th></tr>
+      <tr><td>Direct save (no intermediate)</td><td><code>documents-decision-save-click</code></td><td>~89</td><td>31%</td></tr>
+      <tr><td>Status update before save</td><td><code>documents-decision-status-update-click</code></td><td>~80</td><td>28%</td></tr>
+      <tr><td>Factsheet link before save</td><td><code>documents-decision-fact-sheet-select</code></td><td>~36</td><td>13%</td></tr>
+      <tr><td>Closed without saving (abandonment)</td><td><code>documents-decision-close</code></td><td>~24</td><td>8%</td></tr>
+      <tr><td>Date selection before save</td><td><code>documents-decision-date-select</code></td><td>~19</td><td>7%</td></tr>
+    </tbody>
+  </table>
+
+  <h4>FS-Origin Edit Follow-Through Funnel (4.4 — Last 4 Weeks)</h4>
+  <table>
+    <tbody>
+      <tr><th>Step</th><th>Users</th><th>Conversion</th></tr>
+      <tr><td><code>fact-sheet-details-resource</code> click</td><td>218 (100%)</td><td>—</td></tr>
+      <tr><td><code>documents-decision-edit-button-click</code></td><td>54</td><td><strong>24.8%</strong></td></tr>
+      <tr><td><code>documents-decision-save-click</code></td><td>43</td><td><strong>19.7%</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h4>Historical FS Funnel (May 2026, for reference)</h4>
+  <table>
+    <tbody>
+      <tr><th>Step</th><th>Users</th><th>Drop-off</th><th>Avg Time to Next</th></tr>
+      <tr><td>FS click on related decision</td><td>142</td><td>—</td><td>~5.4 hrs (median 43 min)</td></tr>
+      <tr><td><code>documents-decision-open</code></td><td>33</td><td><span class="badge badge-red">−77%</span></td><td>~36 min</td></tr>
+      <tr><td><code>documents-decision-edit-button-click</code></td><td>19</td><td><span class="badge badge-red">−42%</span></td><td>~3.7 min</td></tr>
+      <tr><td><code>documents-decision-save-click</code></td><td>17</td><td>−11%</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <hr />
+
+  <!-- Section 2 -->
+  <h2>2. End-to-End Customer Journey for Architecture Decisions</h2>
+
+  <table>
+    <tbody>
+      <tr><th>Journey</th><th>Step 1 Users</th><th>Converters</th><th>Rate</th></tr>
+      <tr class="highlight"><td><strong>ADR → Save Diagram</strong></td><td><strong>666</strong></td><td><strong>288</strong></td><td><span class="badge badge-green">43%</span></td></tr>
+      <tr><td>Transformation (any) → Create ADR</td><td>3,470</td><td>142</td><td>4.1%</td></tr>
+      <tr><td>Transformation (saved) → Create ADR</td><td>251</td><td>20</td><td><strong>8%</strong></td></tr>
+      <tr><td>ADR → Save Transformation</td><td>666</td><td>28</td><td>4.2%</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.1 Diagram &amp; ADR</h3>
+  <p><strong>Key takeaway: Weak bridge between diagram and decision.</strong> Only 10% of ADR users embedded a diagram; but 43% of ADR creators later saved a diagram — "Create ADR → Update Diagram" appears to be the dominant pattern.</p>
+  <ul>
+    <li><strong>ADR users are power users</strong> who actively work across both features. Median time between ADR interaction and diagram save: ~2 days.</li>
+    <li><strong>The relationship is asymmetric:</strong> Diagrams are a broad entry point (13K users), ADRs are high-intent and niche (666 users) — but ADR users are far more likely to loop back into diagrams.</li>
+    <li><strong>Discoverability is the primary bottleneck, not UX friction.</strong> Only 2% of diagram-savers subsequently create an ADR. ADR completion once started is healthy (~53%), so the problem is awareness, not workflow difficulty.</li>
+    <li><strong>Only 10% of ADR users embedded a diagram in their decision</strong> — the two features are used in parallel rather than integrated.</li>
+    <li><strong>Multi-session workflow:</strong> Median time from saving a diagram to creating an ADR is ~6 days — requires in-product re-engagement nudges.</li>
+  </ul>
+
+  <table>
+    <tbody>
+      <tr><th>Direction</th><th>Step 1 Users</th><th>Converters</th><th>Rate</th></tr>
+      <tr><td>Save Diagram → Create/Edit ADR</td><td>13,283</td><td>268</td><td>2.0%</td></tr>
+      <tr class="highlight"><td><strong>Create/Edit ADR → Save Diagram</strong></td><td><strong>666</strong></td><td><strong>288</strong></td><td><span class="badge badge-green">43.2%</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.2 Transformation &amp; ADR</h3>
+  <p><strong>Key takeaway: Diagrams and ADR are tightly coupled (43% crossover), but Transformations is largely a separate workflow with little overlap with either.</strong></p>
+  <ul>
+    <li><strong>After saving a Transformation, users go to Diagrams (~15%), not ADRs (~1%).</strong> Practical workflow: Transformation → Diagram (visual iteration), not Transformation → ADR (decision formalization).</li>
+    <li><strong>Users who commit transformation changes are more likely to create an ADR (8%)</strong>, double the rate of casual visitors (4.1%).</li>
+    <li><strong>The full Diagram → ADR → Transformation journey is used by only ~21 users (0.16%)</strong> — a tiny but highly engaged power-user segment.</li>
+    <li><strong>~5–7 day gap between steps</strong> confirms this is a planned, multi-session workflow.</li>
+  </ul>
+
+  <table>
+    <tbody>
+      <tr><th>Feature Pair</th><th>Overlap Users</th><th>Rate</th></tr>
+      <tr><td>ADR users → also use Diagrams</td><td>288 / 666</td><td><span class="badge badge-green">43%</span></td></tr>
+      <tr><td>ADR users → also use Transformations</td><td>28 / 666</td><td>4%</td></tr>
+      <tr><td>Diagram users → also use ADR</td><td>333 / 13,303</td><td>2.5%</td></tr>
+      <tr class="highlight"><td>All 3 features (Diagram + ADR + Transformation)</td><td><strong>21</strong></td><td>0.16%</td></tr>
+    </tbody>
+  </table>
+
+  <h4>Next Action after Saving a Transformation</h4>
+  <table>
+    <tbody>
+      <tr><th>Next Action</th><th>Users</th><th>Share</th></tr>
+      <tr><td><strong>Save Diagram</strong></td><td>27</td><td>~15%</td></tr>
+      <tr><td>Switch to table-view save</td><td>16</td><td>~9%</td></tr>
+      <tr><td>Create Architecture Decision</td><td>2</td><td>~1%</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.3 Factsheet → ADR Funnel</h3>
+  <ul>
+    <li><strong><code>inventory-page-visit</code> is the dominant gateway (~51%).</strong> Many show repeated inventory browsing (multi-hop), suggesting users research context before navigating to a decision.</li>
+    <li>Discovery Inbox surfaces are minor today (<code>saas-discovery-inventory-click</code> ~0.7%).</li>
+    <li><strong>77.7% of users complete the navigation journey within 1 hour</strong> — quick, intent-driven behavior.</li>
+  </ul>
+
+  <table>
+    <tbody>
+      <tr><th>Rank</th><th>Event (Page)</th><th>Users</th><th>Share</th></tr>
+      <tr><td>1</td><td><code>inventory-page-visit</code></td><td>1,313</td><td>~51%</td></tr>
+      <tr><td>2</td><td><code>documents-decision-open</code> (opens a decision first)</td><td>712</td><td>~28%</td></tr>
+      <tr><td>3</td><td><code>saas-discovery-inventory-click</code> (SaaS Discovery Inbox)</td><td>18</td><td>~0.7%</td></tr>
+      <tr><td>4</td><td><code>sap-discovery-inventory-click</code> (SAP Discovery Inbox)</td><td>5</td><td>~0.2%</td></tr>
+      <tr><td>5</td><td><code>discovery-sap-calm-user-navigate-to-inbox</code></td><td>3</td><td>~0.1%</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.4 ADR to ADR</h3>
+  <ul>
+    <li><strong>28% arrive via <code>documents-decision-open</code></strong> — returning to a previously opened decision.</li>
+    <li><strong>97.3% complete the edit-to-save flow within 1 hour.</strong></li>
+    <li><strong>Status update is the dominant intermediate action</strong> — a core part of ADR maintenance, not an edge case.</li>
+  </ul>
+
+  <hr />
+
+  <!-- Section 3 -->
+  <h2>3. Retention &amp; Adoption</h2>
+  <p><strong>Key takeaway: Decision completion is stable (~46%); template completion has significantly improved (~53%); template WAU is down sharply — monitor.</strong></p>
+  <ul>
+    <li><strong>Decision List has a small but loyal recurring user base.</strong> Steep initial drop (100% → ~15% at W1), but flat retention W1–W12 signals stickiness for engaged users.</li>
+    <li>Decision create-to-save: <strong>46.1%</strong> — stable vs. May's ~45–50%.</li>
+    <li>Decision edit-to-save: <strong>83.1%</strong> — once users start editing, they almost always finish.</li>
+    <li>Template create-to-save: <strong>53.3%</strong> — improved from ~47%.</li>
+    <li>Template open-to-save: <strong>53.3%</strong> — major improvement from 33.6%.</li>
+    <li>FS-origin save rate: <strong>19.7%</strong> — improved from 10.6%.</li>
+    <li class="highlight">Template WAU: <strong>85 users, −24.8% WoW</strong> — needs monitoring.</li>
+  </ul>
+
+  <hr />
+
+  <!-- Section 4 -->
+  <h2>4. User Personas</h2>
+  <p>Two distinct segments (behavioral analysis by Alex: <a href="https://leanix.atlassian.net/wiki/x/CoCCYgI">leanix.atlassian.net/wiki/x/CoCCYgI</a>):</p>
+  <table>
+    <tbody>
+      <tr><th>Persona</th><th>Behaviors</th></tr>
+      <tr>
+        <td><strong>Narrative-driven users</strong></td>
+        <td>Multi-paragraph content, embed diagrams, stronger native ADR adoption, rich context for AI models</td>
+      </tr>
+      <tr>
+        <td><strong>Process-focused users</strong></td>
+        <td>Short one-liners, prefer custom Factsheets for reporting &amp; status tracking, use ADRs as demand management questionnaires</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr />
+
+  <!-- Section 5 -->
+  <h2>5. Next Steps</h2>
+
+  <h3>Improve discoverability</h3>
+  <ul>
+    <li>Enhance linking decision widget to support MCP-gen ADR as well as manual creation &amp; linking</li>
+    <li>Modularize the ADR linking/generation pattern from Diagram (TAP Sapphire) and expand to FS, AI chat, and dashboard</li>
+  </ul>
+
+  <h3>Make it more enterprise-ready</h3>
+  <p>Strategize template layout: Confluence-like text field for Narrative-driven EAs &amp; Jira-like metadata fields for Process-driven EAs — one led by AI agent, the other by Automation.</p>
+
+  <h3>Connect persona across journey</h3>
+  <p>Align roles and permission controls across services (FS, Diagram, Transform, AD).</p>
+
+  <hr />
+
+  <!-- Appendix -->
+  <h2>Appendix A — Research Questions &amp; Answers</h2>
+  <table>
+    <tbody>
+      <tr><th>#</th><th>Research Question</th><th>Answer</th></tr>
+      <tr>
+        <td>1</td>
+        <td>Full E2E journey: AS-IS discovery → committed TO-BE?</td>
+        <td><strong>Flow 1:</strong> Create ADR → Create diagram → iterate → embed. <strong>Flow 2:</strong> Create Transformations → Create ADR</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>When customers have both Transformations and ADR, which first?</td>
+        <td>EAs prefer to <strong>create an ADR first</strong> (compare options, get approval) before committing Transformations.</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>When/where should the ADR entry point be?</td>
+        <td>ADR discoverability is critically low. Most EAs are unaware of where to find or create an ADR in LeanIX.</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>How do customers compare multiple decision options visually?</td>
+        <td>Only ~10% of ADR users embed a diagram — visual comparison within the ADR is rare/underused.</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>Do most EAs create an ADR from within a diagram?</td>
+        <td>ADR → Diagram (43%) is more common than Diagram → ADR (2%). Most ADR creation does not originate from within a diagram.</td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>How do customers expect to compare multiple scenarios visually?</td>
+        <td>Open — see Q4 above.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="footer">
+    Generated from <a href="https://app.amplitude.com/analytics/leanix/dashboard/htqz5k4j">Architecture Decision - Funnel analysis</a> Amplitude dashboard &nbsp;·&nbsp;
+    Data range: Last 4 weeks (rolling), scoped to LIVE workspaces, internal accounts excluded &nbsp;·&nbsp;
+    Reference report: <a href="https://leanix.atlassian.net/wiki/x/V4CrZQI">Behavior Data Analysis on Amplitude 2026 Apr</a>
+  </div>
+
+</div>
+</body>
+</html>
