@@ -5,17 +5,16 @@ Review insights from customer calls and past experiments, explore market trends 
 
 ## Activities
 
-## Lay of lands
+- Workshop board:URL TK
+
+### Lay of lands
 * Review report: https://jieunryu-leanix.github.io/ux-research/Echo_2026_Q3_UX_Research/adr-research-synthesis.html
 * Summary of amplitude dashboard: https://jieunryu-leanix.github.io/ux-research/Echo_2026_Q3_UX_Research/amplitude_adr_report_jul2026.html
-* Modern tool world: purpose of document, document tool:
-* Competitor research with Aldoq and more EA tools:
+* Competitor research with Aldoq and more EA tools: https://jieunryu-leanix.github.io/ux-research/Echo_2026_Q3_UX_Research/competitor-research-brief-jul2026.html
+* Modern tool world: purpose of document, document tool: attached in the board
 
-## Theme 1: Ideation for human interactions, focusing on Diagrams, Factsheets, and Access Control.
- 
+### Theme 1: Ideation based on known user journey and problem
 
+### Theme 2: Revisit them with AI capibility focusing on the EA Agent, Automation, and Integrations.
 
-## Theme 2: MCP tool ideation, focusing on the EA Agent, Automation, and Integrations.
-
-
-## Wrap-up
+### Wrap-up
