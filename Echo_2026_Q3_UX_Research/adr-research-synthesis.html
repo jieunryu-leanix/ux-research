@@ -335,7 +335,7 @@
       </div>
       <div>
         <div class="hyp-title">Users expect ADR impact to propagate to linked Fact Sheets</div>
-        <div class="hyp-body">Partially confirmed. Pernod Ricard's Deborah manually propagates impact — she wants automation with a review gate. Toyota Kreditbank wants principle compliance visible on fact sheets. Expectation exists; the question is automated vs. mediated propagation.</div>
+        <div class="hyp-body">Partially confirmed. P2 participant (Pernod Ricard) manually propagates impact — she wants automation with a review gate. Toyota Kreditbank wants principle compliance visible on fact sheets. Expectation exists; the question is automated vs. mediated propagation.</div>
       </div>
     </div>
 
@@ -348,15 +348,15 @@
     <div class="insight-num">Insight 1</div>
     <h3>The ADR-as-dossier mental model is universal and conflicts with current feature design</h3>
     <p>Every customer — regardless of maturity — described the ADR as a <strong>navigation hub</strong>, not a single decision record. The mental model: one document connecting diagrams (current and target), linked fact sheets, principles followed or excepted, initiative context, and approval evidence.</p>
-    <p>Safran calls it an "ASR" and describes it as a dossier. Toyota Kreditbank's Sabrina proposed the "Word to PDF" model unprompted: a collaborative working document that generates a locked artifact on approval. Pernod Ricard manually builds this hub across diagrams, fact sheets, and to-dos. DHL wants LeanIX as the repository for every architecture deliverable.</p>
+    <p>Safran calls it an "ASR" and describes it as a dossier. P4 participant (Toyota Kreditbank) proposed the "Word to PDF" model unprompted: a collaborative working document that generates a locked artifact on approval. Pernod Ricard manually builds this hub across diagrams, fact sheets, and to-dos. DHL wants LeanIX as the repository for every architecture deliverable.</p>
     <p>The current ADR feature is a text document with a status. The gap is structural.</p>
     <blockquote>
       "Going into an ASR, you can go to application fact sheet, initiative fact sheet, and then going deeper into the GANT of the project."
-      <span class="source">— JP Matton, Safran</span>
+      <span class="source">— P3 participant, Safran</span>
     </blockquote>
     <blockquote>
       "You have the Word document, people are working on it... and once you say yes, it's fine — generate the PDF and nobody can touch it."
-      <span class="source">— Sabrina Oberdörfer, Toyota Kreditbank</span>
+      <span class="source">— P4 participant, Toyota Kreditbank</span>
     </blockquote>
   </div>
 
@@ -367,11 +367,11 @@
     <p>Three specific requirements emerge: (1) <strong>domain-routed approval</strong>; (2) <strong>custom outcome statuses</strong> ("accepted with exception," "accepted with risk," "accepted with follow-up"); (3) <strong>immutable audit trail</strong> with change log and role attribution — a compliance necessity for regulated industries.</p>
     <blockquote>
       "I see a last updated 11 days ago, no idea who it was."
-      <span class="source">— Sabrina Oberdörfer, Toyota Kreditbank (on missing audit trail)</span>
+      <span class="source">— P4 participant, Toyota Kreditbank (on missing audit trail)</span>
     </blockquote>
     <blockquote>
       "It's not prevented by the system. That's the problem."
-      <span class="source">— Sabrina Oberdörfer, Toyota Kreditbank (on wrong-role approval)</span>
+      <span class="source">— P4 participant, Toyota Kreditbank (on wrong-role approval)</span>
     </blockquote>
     <blockquote>
       "We need more process statuses before the draft stage."
@@ -382,18 +382,18 @@
   <div class="new-insight">
     <div class="insight-num">Insight 3</div>
     <h3>Architecture principles are the missing governance layer — named by 3 of 4 customers independently</h3>
-    <p>DHL: principles are group-wide standards every project must follow, but cannot be linked to ADRs or analyzed. Safran: principles live as short labels in ArchiMate. When asked where they're stored in LeanIX: "We are waiting for you." JP wants portfolio queries: "Show me all the applications not in accordance with Cloud First." Toyota Kreditbank: Sabrina has the most complete model — 15 principles, each ADR must state which are followed or excepted, ARB must approve exceptions, governance report by compliance rate per principle.</p>
+    <p>DHL: principles are group-wide standards every project must follow, but cannot be linked to ADRs or analyzed. Safran: principles live as short labels in ArchiMate. When asked where they're stored in LeanIX: "We are waiting for you." P3 participant wants portfolio queries: "Show me all the applications not in accordance with Cloud First." Toyota Kreditbank: P4 participant has the most complete model — 15 principles, each ADR must state which are followed or excepted, ARB must approve exceptions, governance report by compliance rate per principle.</p>
     <blockquote>
       "We are waiting for you."
-      <span class="source">— JP Matton, Safran</span>
+      <span class="source">— P3 participant, Safran</span>
     </blockquote>
     <blockquote>
       "Show me all the applications that are not in accordance with Cloud First."
-      <span class="source">— JP Matton, Safran</span>
+      <span class="source">— P3 participant, Safran</span>
     </blockquote>
     <blockquote>
       "Cloud first is our principle, but Kazakhstan has a government law — you can't do anything about it. You just document the exception and the Architecture Review Board approves it."
-      <span class="source">— Sabrina Oberdörfer, Toyota Kreditbank</span>
+      <span class="source">— P4 participant, Toyota Kreditbank</span>
     </blockquote>
   </div>
 
@@ -403,29 +403,29 @@
     <p>Every customer has a phase between "someone has an idea" and "ADR is in Draft" that LeanIX does not support. Pernod Ricard uses ServiceNow→Jira→LeanIX. Jira exists solely because LeanIX has no pre-Draft triage step. DHL uses Excel for project requests. The implication: not that LeanIX should become a task manager, but that the ADR status model needs earlier stages ("Intake," "Triage," "In Review") that map to pre-Draft governance phases already happening in customers' organizations.</p>
     <blockquote>
       "We have a kind of overlap [between Jira and LeanIX]. Then the question is, do we still need the GER?"
-      <span class="source">— Deborah Aicardi Douchin, Pernod Ricard</span>
+      <span class="source">— P2 participant, Pernod Ricard</span>
     </blockquote>
   </div>
 
   <div class="new-insight">
     <div class="insight-num">Insight 5</div>
     <h3>AI document generation from LeanIX data is the clearest AI use case — not querying</h3>
-    <p>Safran: "Please create me my PowerPoint based on this template for the application MS Dynamics" — template-driven generation from fact sheet data. Toyota Kreditbank's Sabrina already does this manually: Copilot records the ARB meeting, she asks it to extract ADR content, hands the draft to the solution architect. This is live today, outside LeanIX. Pernod Ricard: immediate positive reaction to the diagram-to-ADR AI generation demo. "If we use the functionality you just showed me in the diagram, that could solve it." The highest-demand AI capability: given existing LeanIX data, generate a structured document draft. The MCP integration opportunity is already real for Toyota Kreditbank.</p>
+    <p>Safran: "Please create me my PowerPoint based on this template for the application MS Dynamics" — template-driven generation from fact sheet data. P4 participant (Toyota Kreditbank) already does this manually: Copilot records the ARB meeting, they ask it to extract ADR content, then hand the draft to the solution architect. This is live today, outside LeanIX. Pernod Ricard: immediate positive reaction to the diagram-to-ADR AI generation demo. "If we use the functionality you just showed me in the diagram, that could solve it." The highest-demand AI capability: given existing LeanIX data, generate a structured document draft. The MCP integration opportunity is already real for Toyota Kreditbank.</p>
     <blockquote>
       "We are spending more time on documenting what we decided than on deciding what to do."
-      <span class="source">— JP Matton, Safran</span>
+      <span class="source">— P3 participant, Safran</span>
     </blockquote>
     <blockquote>
       "Please create me my PowerPoint based on this template for the application MS Dynamics."
-      <span class="source">— Fong Visdeloup, Safran</span>
+      <span class="source">— P3 participant, Safran</span>
     </blockquote>
     <blockquote>
       "I ask Copilot to generate the relevant information for the Architecture Decision record and provide it to the solution architect."
-      <span class="source">— Sabrina Oberdörfer, Toyota Kreditbank (live AI workflow today)</span>
+      <span class="source">— P4 participant, Toyota Kreditbank (live AI workflow today)</span>
     </blockquote>
     <blockquote>
       "If we use the functionality you just showed me in the diagram, that could solve it."
-      <span class="source">— Deborah Aicardi Douchin, Pernod Ricard</span>
+      <span class="source">— P2 participant, Pernod Ricard</span>
     </blockquote>
   </div>
 
@@ -435,11 +435,11 @@
     <p>C-level stakeholders, external reviewers, and compliance officers are not LeanIX users. Safran: needs PowerPoint-compatible output — PDF and Markdown are insufficient. Pernod Ricard: the "Decision Paper" (PPT deck) remains the authoritative presentation artifact alongside the LeanIX ADR — both must exist. DHL: architecture deliverables are currently PowerPoints; goal is to produce the same document from LeanIX. Current Markdown export does not address the executive communication need.</p>
     <blockquote>
       "We cannot export Architecture Decision."
-      <span class="source">— Fong Visdeloup, Safran</span>
+      <span class="source">— P3 participant, Safran</span>
     </blockquote>
     <blockquote>
       "Always, always, always need the diagram. We are quite strict on this one."
-      <span class="source">— Deborah Aicardi Douchin, Pernod Ricard (on mandatory diagram + Decision Paper)</span>
+      <span class="source">— P2 participant, Pernod Ricard (on mandatory diagram + Decision Paper)</span>
     </blockquote>
   </div>
 
